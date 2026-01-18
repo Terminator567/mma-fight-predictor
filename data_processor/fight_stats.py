@@ -15,4 +15,5 @@ def fightStats(df: pd.DataFrame):
 
 def fighterDataframe(df: pd.DataFrame):
     df['target'] = (df['Winner'] == 'Fighter 1').astype(int)
+    convert_to_csv(df)
     return df
