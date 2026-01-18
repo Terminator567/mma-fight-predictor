@@ -1,4 +1,4 @@
-from data_processor.fight_stats import fighterDataframe, fightStats
+from data_processor.fight_stats import fighterDataframe, fightStats, fighterStats
 from data.get_data import get_dataframe
 from data_processor.data_types_fixes import check_and_process_data_type
 
@@ -10,6 +10,10 @@ from data_processor.data_types_fixes import check_and_process_data_type
 # print(df1.head())
 
 df = get_dataframe("processed.csv")
-df1 = fighterDataframe(df)
-print(df1.head())
+# df1 = fighterDataframe(df)
+# print(df1.head())
+
+stats = fighterStats(df)
+
+print(stats)
 
