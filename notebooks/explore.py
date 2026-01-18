@@ -6,3 +6,11 @@ print(data.head())
 
 print("\n")
 print(f"Total fights: {len(data)}")
+
+print("\n")
+print("Columns:")
+print(data.columns.tolist())
+
+print("\n")
+print("Who wins more?")
+print(data['Winner'].value_counts())
