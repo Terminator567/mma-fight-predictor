@@ -22,3 +22,4 @@ def check_and_process_data_type(df: DataFrame):
     existing_columns = [col for col in columns_to_float if col in df.columns]
     df[existing_columns] = df[existing_columns].astype(float)
     
+    return df
