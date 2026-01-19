@@ -63,4 +63,13 @@ def fighterStats(df: pd.DataFrame):
         total_fights=("Fights", "sum")
     )
     
+    fighter_stats["win_rate"] = fighter_stats["total_wins"] / fighter_stats["total_fights"]
+    fighter_stats["avg_KD"] = fighter_stats["total_KD"] / fighter_stats["total_fights"]
+    fighter_stats["avg_STR"] = fighter_stats["total_STR"] / fighter_stats["total_fights"]
+    fighter_stats["avg_TD"] = fighter_stats["total_TD"] / fighter_stats["total_fights"]
+    fighter_stats["avg_SUB"] = fighter_stats["total_SUB"] / fighter_stats["total_fights"]
+    fighter_stats["offense_score"] = (
+        fighter_stats["avg_STR"] + fighter_stats["avg_TD"] + fighter_stats["avg_KD"]
+    )
+    
     return fighter_stats
