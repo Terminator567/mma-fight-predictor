@@ -30,5 +30,18 @@ def calculate_statistics(df: pd.DataFrame) -> pd.DataFrame:
         df.at[idx, 'Fighter_2_total_STR'] = fighter_stats[f2]['STR']
         df.at[idx, 'Fighter_1_total_TD'] = fighter_stats[f1]['TD']
         df.at[idx, 'Fighter_2_total_TD'] = fighter_stats[f2]['TD']
+
+        fighter_stats[f1]['SUB'] += row['Fighter_1_SUB']
+        fighter_stats[f2]['SUB'] += row['Fighter_2_SUB']
+        fighter_stats[f1]['KD'] += row['Fighter_1_KD']
+        fighter_stats[f2]['KD'] += row['Fighter_2_KD']
+        fighter_stats[f1]['STR'] += row['Fighter_1_STR']
+        fighter_stats[f2]['STR'] += row['Fighter_2_STR']
+        fighter_stats[f1]['TD'] += row['Fighter_1_TD']
+        fighter_stats[f2]['TD'] += row['Fighter_2_TD']
     
     return df
+
+df = pd.read_csv('../data/original.csv')
+df = calculate_statistics(df)
+df.to_csv('../data/ufc_with_career_stats.csv', index=False)
