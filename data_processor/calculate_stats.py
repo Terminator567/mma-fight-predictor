@@ -32,7 +32,3 @@ def calculate_statistics(df: pd.DataFrame) -> pd.DataFrame:
         df.at[idx, 'Fighter_2_total_TD'] = fighter_stats[f2]['TD']
     
     return df
-
-df = pd.read_csv('../data/ufc_cleaned.csv')
-df = calculate_statistics(df)
-df.to_csv('../data/ufc_with_career_stats.csv', index=False)
