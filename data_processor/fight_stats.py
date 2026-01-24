@@ -1,4 +1,5 @@
 import pandas as pd
+from pathlib import Path
 
 def fightStats(df: pd.DataFrame):
     df['KD_diff'] = df['Fighter_1_KD'] - df['Fighter_2_KD']
@@ -10,70 +11,141 @@ def fightStats(df: pd.DataFrame):
 
 
 def fighterDataframe(df: pd.DataFrame):
-    df['target'] = (df['Winner'] == df['Fighter 1']).astype(int)
+    df['target'] = (df['Winner'] == 'Fighter 1').astype(int)
     return df
 
+def fight_stats(df: pd.DataFrame) -> pd.DataFrame:
 
-import pandas as pd
+    df = df.copy()
 
-def fighterStats(processed_df: pd.DataFrame) -> pd.DataFrame:
-    original_df = pd.read_csv('../data/original.csv')
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    df["Event Name"] = df["Event Name"].astype(str)
 
-    cols = ["Name", "KD", "STR", "TD", "SUB", "Winner"]
+    df["KD_diff"] = df["Fighter_1_KD"] - df["Fighter_2_KD"]
+    df["STR_diff"] = df["Fighter_1_STR"] - df["Fighter_2_STR"]
+    df["TD_diff"] = df["Fighter_1_TD"] - df["Fighter_2_TD"]
+    df["SUB_diff"] = df["Fighter_1_SUB"] - df["Fighter_2_SUB"]
 
-    fighter_1 = processed_df[[
-        "Fighter 1",
-        "Fighter_1_KD",
-        "Fighter_1_STR",
-        "Fighter_1_TD",
-        "Fighter_1_SUB",
-        "Winner"
-    ]].copy()
-    fighter_1.columns = cols
-    fighter_1["WINS"] = (fighter_1["Name"] == fighter_1["Winner"]).astype(int)
-    fighter_1["Fights"] = 1
+    df["target"] = (df["Winner"] == df["Fighter 1"]).astype(int)
 
-    fighter_2 = processed_df[[
-        "Fighter 2",
-        "Fighter_2_KD",
-        "Fighter_2_STR",
-        "Fighter_2_TD",
-        "Fighter_2_SUB",
-        "Winner"
-    ]].copy()
-    fighter_2.columns = cols
-    fighter_2["WINS"] = (fighter_2["Name"] == fighter_2["Winner"]).astype(int)
-    fighter_2["Fights"] = 1
+    BASE_DIR = Path(__file__).resolve().parent
+    DATA_DIR = BASE_DIR.parent / "data"
 
-    fighters = pd.concat([fighter_1, fighter_2], ignore_index=True)
+    ufc_path = DATA_DIR / "ufc_with_career_stats.csv"
+    ufc = pd.read_csv(ufc_path)
+    ufc = ufc.copy()
+    ufc["Date"] = pd.to_datetime(ufc["Date"], errors="coerce")
+    ufc["Event Name"] = ufc["Event Name"].astype(str)
 
-    fighter_stats = fighters.groupby("Name", as_index=False).agg(
-        avg_KD=("KD", "mean"),
-        avg_STR=("STR", "mean"),
-        avg_TD=("TD", "mean"),
-        avg_SUB=("SUB", "mean"),
-        win_rate=("WINS", "mean")
-    )
+    stat_cols = [
+        "Fighter_1_KD","Fighter_2_KD",
+        "Fighter_1_STR","Fighter_2_STR",
+        "Fighter_1_TD","Fighter_2_TD",
+        "Fighter_1_SUB","Fighter_2_SUB",
+    ]
+    for c in stat_cols:
+        ufc[c] = pd.to_numeric(ufc[c], errors="coerce").fillna(0.0)
 
-    original_df = original_df.merge(
-        fighter_stats.add_prefix("F1_"),
-        left_on="Fighter 1",
-        right_on="F1_Name",
-        how="left"
-    ).drop(columns=["F1_Name"])
+    ufc = ufc.sort_values(["Date", "Event Name", "Round", "Time"], ascending=[True, True, True, True]).reset_index(drop=True)
 
-    original_df = original_df.merge(
-        fighter_stats.add_prefix("F2_"),
-        left_on="Fighter 2",
-        right_on="F2_Name",
-        how="left"
-    ).drop(columns=["F2_Name"])
+    def _mk_key(date_series, event_series, f1_series, f2_series):
+        return (
+            date_series.astype(str) + "|" +
+            event_series.astype(str) + "|" +
+            f1_series.astype(str) + "|" +
+            f2_series.astype(str)
+        )
 
-    return original_df
+    ufc["fight_key"] = _mk_key(ufc["Date"], ufc["Event Name"], ufc["Fighter 1"], ufc["Fighter 2"])
+    df["fight_key"]  = _mk_key(df["Date"],  df["Event Name"],  df["Fighter 1"],  df["Fighter 2"])
 
+    f1 = pd.DataFrame({
+        "fight_key": ufc["fight_key"],
+        "fighter": ufc["Fighter 1"],
+        "KD": ufc["Fighter_1_KD"],
+        "STR": ufc["Fighter_1_STR"],
+        "TD": ufc["Fighter_1_TD"],
+        "SUB": ufc["Fighter_1_SUB"],
+        "win": (ufc["Winner"] == ufc["Fighter 1"]).astype(int),
+        "Date": ufc["Date"],
+        "Event Name": ufc["Event Name"],
+    })
+    f2 = pd.DataFrame({
+        "fight_key": ufc["fight_key"],
+        "fighter": ufc["Fighter 2"],
+        "KD": ufc["Fighter_2_KD"],
+        "STR": ufc["Fighter_2_STR"],
+        "TD": ufc["Fighter_2_TD"],
+        "SUB": ufc["Fighter_2_SUB"],
+        "win": (ufc["Winner"] == ufc["Fighter 2"]).astype(int),
+        "Date": ufc["Date"],
+        "Event Name": ufc["Event Name"],
+    })
 
-df = pd.read_csv('../data/original.csv')
-df = fightStats(df)
-df = fighterDataframe(df)
-#df = fighterStats(df)
-df.to_csv('../data/processed.csv', index=False)
+    long_df = pd.concat([f1, f2], ignore_index=True)
+    long_df = long_df.sort_values(["fighter", "Date", "Event Name"]).reset_index(drop=True)
+
+    long_df["fights_so_far"] = long_df.groupby("fighter").cumcount()
+
+    for stat in ["KD", "STR", "TD", "SUB", "win"]:
+        long_df[f"career_avg_{stat}"] = (
+            long_df.groupby("fighter")[stat]
+            .expanding()
+            .mean()
+            .reset_index(level=0, drop=True)
+            .shift(1)
+        )
+
+    for stat in ["KD", "STR", "TD", "SUB", "win"]:
+        long_df[f"last5_avg_{stat}"] = (
+            long_df.groupby("fighter")[stat]
+            .rolling(window=5, min_periods=1)
+            .mean()
+            .reset_index(level=0, drop=True)
+            .shift(1)
+        )
+
+    feat_cols = ["fights_so_far"] + [c for c in long_df.columns if c.startswith("career_avg_") or c.startswith("last5_avg_")]
+    long_df[feat_cols] = long_df[feat_cols].fillna(0.0)
+
+    f1_feat = long_df[["fight_key", "fighter"] + feat_cols].rename(columns={"fighter": "Fighter 1"})
+    f1_feat = f1_feat.rename(columns={c: f"F1_{c}" for c in feat_cols})
+    df = df.merge(f1_feat.drop(columns=["Fighter 1"]), on="fight_key", how="left")
+
+    f2_feat = long_df[["fight_key", "fighter"] + feat_cols].rename(columns={"fighter": "Fighter 2"})
+    f2_feat = f2_feat.rename(columns={c: f"F2_{c}" for c in feat_cols})
+    df = df.merge(f2_feat.drop(columns=["Fighter 2"]), on="fight_key", how="left")
+
+    new_cols = [c for c in df.columns if c.startswith("F1_") or c.startswith("F2_")]
+    df[new_cols] = df[new_cols].fillna(0.0)
+
+    if "F1_career_avg_STR" in df.columns and "F2_career_avg_STR" in df.columns:
+        df["career_avg_STR_diff"] = df["F1_career_avg_STR"] - df["F2_career_avg_STR"]
+
+    if "F1_career_avg_win" in df.columns and "F2_career_avg_win" in df.columns:
+        df["career_winrate_diff"] = df["F1_career_avg_win"] - df["F2_career_avg_win"]
+
+    if "F1_last5_avg_STR" in df.columns and "F2_last5_avg_STR" in df.columns:
+        df["last5_avg_STR_diff"] = df["F1_last5_avg_STR"] - df["F2_last5_avg_STR"]
+
+    if "F1_last5_avg_win" in df.columns and "F2_last5_avg_win" in df.columns:
+        df["last5_winrate_diff"] = df["F1_last5_avg_win"] - df["F2_last5_avg_win"]
+
+    num_cols = df.select_dtypes(include="number").columns
+    df[num_cols] = df[num_cols].round(2)
+
+    return df
+
+if __name__ == "__main__":
+    import pandas as pd
+    from pathlib import Path
+
+    BASE_DIR = Path(__file__).resolve().parent
+
+    DATA_DIR = BASE_DIR.parent / "data"
+
+    processed_path = DATA_DIR / "processed.csv"
+
+    df = pd.read_csv(processed_path)
+    df = fight_stats(df)
+    df.to_csv(processed_path, index=False)
