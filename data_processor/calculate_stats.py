@@ -42,6 +42,3 @@ def calculate_statistics(df: pd.DataFrame) -> pd.DataFrame:
     
     return df
 
-df = pd.read_csv('../data/original.csv')
-df = calculate_statistics(df)
-df.to_csv('../data/ufc_with_career_stats.csv', index=False)
