@@ -4,10 +4,11 @@ from data_processor.data_categorising import categories_columns
 from data_processor.data_cleaner import clean_data
 from data_processor.fight_stats import finalProcessingForFighter, calculateAverages
 from data_processor.data_types_fixes import check_and_process_data_type, drop_col_for_training
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, roc_auc_score
+from sklearn.pipeline import Pipeline
 import numpy as np
 
 og_df = get_dataframe('original.csv')
@@ -32,28 +33,36 @@ X_train, X_test, y_train, y_test = train_test_split(
     stratify=y
 )
 
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
+pipe = Pipeline([
+    ("scaler", StandardScaler()),
+    ("knn", KNeighborsClassifier())
+])
 
-best_k = None
-best_acc = -1.0
+param_grid = {
+    "knn__n_neighbors": range(1, 51),
+    "knn__weights": ["uniform", "distance"],
+    "knn__p": [1, 2], 
+    "knn__leaf_size": [10, 20, 30, 40, 50],
+}
 
-k_range = range(1, 51)  
-for k in k_range:
-    model = KNeighborsClassifier(n_neighbors=k, weights="distance")
-    model.fit(X_train_scaled, y_train)
-    pred = model.predict(X_test_scaled)
-    acc = accuracy_score(y_test, pred)
+grid = GridSearchCV(
+    estimator=pipe,
+    param_grid=param_grid,
+    scoring="accuracy",
+    n_jobs=-1
+)
 
-    if acc > best_acc:
-        best_acc = acc
-        best_k = k
+grid.fit(X_train, y_train)
+best_model = grid.best_estimator_
 
-best_model = KNeighborsClassifier(n_neighbors=best_k, weights="distance")
-best_model.fit(X_train_scaled, y_train)
-best_pred = best_model.predict(X_test_scaled)
+y_pred = best_model.predict(X_test)
+y_proba = best_model.predict_proba(X_test)[:, 1]
 
-print(f"\nBest k: {best_k} with accuracy: {best_acc}")
-print("\nConfusion Matrix:\n", confusion_matrix(y_test, best_pred))
-print("\nClassification Report:\n", classification_report(y_test, best_pred))
+print("Best CV accuracy:", grid.best_score_)
+print("Best parameters:", grid.best_params_)
+
+print("\nTest Accuracy:", accuracy_score(y_test, y_pred))
+print("ROC-AUC Score:", roc_auc_score(y_test, y_proba))
+
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
