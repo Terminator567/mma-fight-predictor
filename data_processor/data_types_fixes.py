@@ -31,5 +31,7 @@ def drop_col_for_training(df: DataFrame) -> DataFrame:
     df = df.drop('Weight_Class', axis=1)
     df = df.drop('Round', axis=1)
     df = df.drop('Time', axis=1)
+    df = df.drop('Fighter_code', axis=1)
+    df = df.drop('Opp_code', axis=1)
 
     return df
