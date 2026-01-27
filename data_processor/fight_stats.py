@@ -32,7 +32,7 @@ def calculateAverages(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 def finalProcessingForFighter(df: pd.DataFrame) -> pd.DataFrame:
-    cols = ["Fighter", "Opp", "Date", "KD", "STR", "TD", "SUB", "Weight_Class", "Round", "Time", "Winner"]
+    cols = ["Fighter", "Opp", "Date", "KD", "STR", "TD", "SUB", "Opp_KD", "Opp_STR", "Opp_TD", "Opp_SUB", "Weight_Class", "Round", "Time", "Winner"]
 
     fighter_1 = df[[
         "Fighter 1",
@@ -42,6 +42,10 @@ def finalProcessingForFighter(df: pd.DataFrame) -> pd.DataFrame:
         "Fighter_1_total_STR",
         "Fighter_1_total_TD",
         "Fighter_1_total_SUB",
+        "Fighter_2_total_KD",
+        "Fighter_2_total_STR",
+        "Fighter_2_total_TD",
+        "Fighter_2_total_SUB",
         "Weight_Class",
         "Round",
         "Time",
@@ -55,6 +59,10 @@ def finalProcessingForFighter(df: pd.DataFrame) -> pd.DataFrame:
         "Fighter 2",
         "Fighter 1",
         "Date",
+        "Fighter_2_total_KD",
+        "Fighter_2_total_STR",
+        "Fighter_2_total_TD",
+        "Fighter_2_total_SUB",
         "Fighter_1_total_KD",
         "Fighter_1_total_STR",
         "Fighter_1_total_TD",
@@ -71,7 +79,7 @@ def finalProcessingForFighter(df: pd.DataFrame) -> pd.DataFrame:
     fighters = pd.concat([fighter_1, fighter_2], ignore_index=True)
     
     fighter_stats = (
-        fighters.loc[:, ["Fighter", "Date", "Opp", "Weight_Class", "KD", "STR", "TD", "SUB", "Round", "Time", "Target"]]
+        fighters.loc[:, ["Fighter", "Date", "Opp", "Weight_Class", "KD", "STR", "TD", "SUB", "Opp_KD", "Opp_STR", "Opp_TD", "Opp_SUB", "Round", "Time", "Target"]]
         .drop_duplicates(subset=["Fighter", "Date"])
         .rename(columns={
             "KD": "Total_KD",
