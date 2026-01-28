@@ -4,14 +4,12 @@ def calculateAverages(df: pd.DataFrame) -> pd.DataFrame:
     df['Date'] = pd.to_datetime(df['Date'])
     df = df.sort_values(['Fighter', 'Date'])
 
-    # Penalize losses
     df['Adj_Time'] = df['Time']
     df.loc[df['Target'] == 0, 'Adj_Time'] = df['Time'] * 2
 
     df['Adj_Round'] = df['Round']
     df.loc[df['Target'] == 0, 'Adj_Round'] = df['Round'] * 2
 
-    # Historical averages (no leakage)
     df['Avg_Round_Time'] = (
         df.groupby('Fighter')['Adj_Time']
         .transform(lambda s: s.shift().expanding().mean())
@@ -25,9 +23,26 @@ def calculateAverages(df: pd.DataFrame) -> pd.DataFrame:
     df['Avg_Round_Time'] = df['Avg_Round_Time'].fillna(0)
     df['Avg_Round'] = df['Avg_Round'].fillna(0)
     
+    df['Opp_Adj_Time'] = df['Time']
+    df.loc[df['Target'] == 1, 'Opp_Adj_Time'] = df['Time'] * 2
+
+    df['Opp_Adj_Round'] = df['Round']
+    df.loc[df['Target'] == 1, 'Opp_Adj_Round'] = df['Round'] * 2
+
+    df['Opp_Avg_Round_Time'] = (
+        df.groupby('Opp')['Opp_Adj_Time']
+        .transform(lambda s: s.shift().expanding().mean())
+    )
+
+    df['Opp_Avg_Round'] = (
+        df.groupby('Opp')['Opp_Adj_Round']
+        .transform(lambda s: s.shift().expanding().mean())
+    )
+
+    df['Opp_Avg_Round_Time'] = df['Opp_Avg_Round_Time'].fillna(0)
+    df['Opp_Avg_Round'] = df['Opp_Avg_Round'].fillna(0)
     
-    df = df.drop('Adj_Time', axis=1)
-    df = df.drop('Adj_Round', axis=1)
+    df = df.drop(['Adj_Time', 'Adj_Round', 'Opp_Adj_Time', 'Opp_Adj_Round'], axis=1)
     
     return df
 
