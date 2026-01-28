@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MMA Fight Predictor</title>
+    <link rel="stylesheet" href="/frontend/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1> MMA Fight Predictor</h1>
+            <p>Predict the winner of any UFC matchup</p>
+        </header>
+
+        <main>
+            <div class="fighter-selection">
+                <div class="fighter-input">
+                    <label for="fighter1">Fighter 1:</label>
+                    <input 
+                        type="text" 
+                        id="fighter1" 
+                        placeholder="Enter fighter name..." 
+                        autocomplete="off"
+                    >
+                    <ul class="suggestions" id="suggestions1"></ul>
+                </div>
+
+                <div class="vs-divider">VS</div>
+
+                <div class="fighter-input">
+                    <label for="fighter2">Fighter 2:</label>
+                    <input 
+                        type="text" 
+                        id="fighter2" 
+                        placeholder="Enter fighter name..." 
+                        autocomplete="off"
+                    >
+                    <ul class="suggestions" id="suggestions2"></ul>
+                </div>
+            </div>
+
+            <button id="predictBtn" class="predict-btn">Predict Winner</button>
+
+            <div id="loading" class="loading hidden">
+                <div class="spinner"></div>
+                <p>Analyzing fighters...</p>
+            </div>
+
+            <div id="result" class="result hidden">
+                <div class="result-header">
+                    <h2>Prediction Result</h2>
+                    <button class="close-btn" onclick="closeResult()">✕</button>
+                </div>
+                
+                <div class="fighters-comparison">
+                    <div class="fighter-card">
+                        <h3 id="resultFighter1"></h3>
+                        <div class="stats">
+                            <div class="stat">
+                                <span class="label">Weight Class:</span>
+                                <span id="weight1" class="value"></span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Total KD:</span>
+                                <span id="kd1" class="value"></span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Total Strikes:</span>
+                                <span id="str1" class="value"></span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Total Takedowns:</span>
+                                <span id="td1" class="value"></span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Total Submissions:</span>
+                                <span id="sub1" class="value"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="prediction-box">
+                        <div class="winner-badge" id="winnerBadge"></div>
+                        <p id="winnerText"></p>
+                        <div class="confidence">
+                            <span id="confidence"></span>
+                        </div>
+                    </div>
+
+                    <div class="fighter-card">
+                        <h3 id="resultFighter2"></h3>
+                        <div class="stats">
+                            <div class="stat">
+                                <span class="label">Weight Class:</span>
+                                <span id="weight2" class="value"></span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Total KD:</span>
+                                <span id="kd2" class="value"></span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Total Strikes:</span>
+                                <span id="str2" class="value"></span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Total Takedowns:</span>
+                                <span id="td2" class="value"></span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Total Submissions:</span>
+                                <span id="sub2" class="value"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="error" class="error hidden"></div>
+        </main>
+
+        <footer>
+            <p>&copy; 2024 MMA Fight Predictor. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
