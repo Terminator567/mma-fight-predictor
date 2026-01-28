@@ -1,22 +1,12 @@
-from data.get_data import get_dataframe, convert_to_csv
-from data_processor.data_types_fixes import check_and_process_data_type
-from data_processor.data_cleaner import clean_data
-from data_processor.calculate_stats import calculate_statistics
-from data_processor.data_categorising import categories_columns
-from data_processor.fight_stats import finalProcessingForFighter
+from app import create_app
+import os
+from flask import request
 
-# df = get_dataframe("processed.csv")
-# df = calculate_statistics(df)
+app = create_app()
 
-# df = finalProcessingForFighter(df)
-
-# df = check_and_process_data_type(df)
-
-# df = clean_data(df)
-# df = calculate_statistics(df)
-
-# df = categories_columns(df)
-
-# df = fighterStats(df)
-
-# print(df)
+if __name__ == '__main__':
+    app.run(
+            debug=os.environ.get('FLASK_ENV') != 'production', 
+            host='0.0.0.0', 
+            port=8000
+        )
