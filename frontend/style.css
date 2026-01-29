@@ -123,7 +123,14 @@ main {
 }
 
 .vs-divider {
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2em;
+    font-weight: bold;
+    color: #ffa500;
+    padding: 0 20px;
+    margin-top: 30px;
 }
 
 .predict-btn {
@@ -155,11 +162,20 @@ main {
 }
 
 .loading {
-    display: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 40px;
 }
 
 .loading.hidden {
     display: none;
+}
+
+.loading p {
+    color: #ffa500;
+    font-size: 1.2em;
 }
 
 .spinner {
@@ -177,7 +193,13 @@ main {
 }
 
 .result {
-    display: none;
+    width: 100%;
+    max-width: 1000px;
+    background: rgba(42, 42, 58, 0.8);
+    border-radius: 15px;
+    padding: 30px;
+    border: 2px solid rgba(255, 165, 0, 0.3);
+    animation: slideIn 0.5s ease;
 }
 
 .result.hidden {
@@ -222,13 +244,83 @@ main {
     transform: scale(1.2);
 }
 
+.fighters-comparison {
+    display: flex;
+    gap: 30px;
+    align-items: stretch;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.fighter-card {
+    flex: 1;
+    min-width: 250px;
+    background: rgba(30, 30, 46, 0.6);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid #444;
+    transition: all 0.3s ease;
+}
+
+.fighter-card:hover {
+    border-color: #ffa500;
+    box-shadow: 0 0 20px rgba(255, 165, 0, 0.2);
+}
+
+.fighter-card h3 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+    text-align: center;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #444;
+    transition: color 0.3s ease;
+}
+
+.stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stat {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(68, 68, 68, 0.5);
+}
+
+.stat .label {
+    color: #b0b0b0;
+    font-weight: 500;
+}
+
+.stat .value {
+    color: #ffa500;
+    font-weight: 700;
+}
+
 .prediction-box {
-    display: none;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.1), rgba(255, 140, 0, 0.1));
+    border-radius: 12px;
+    border: 2px solid #ffa500;
+    min-width: 200px;
+    animation: pulse 2s ease-in-out infinite;
 }
 
 @keyframes pulse {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+    50% { transform: scale(1.05); }
+}
+
+.winner-badge {
+    font-size: 4em;
+    margin-bottom: 15px;
 }
 
 .prediction-box p {
@@ -239,10 +331,66 @@ main {
     margin-bottom: 15px;
 }
 
+.confidence {
+    font-size: 1.2em;
+    color: #b0b0b0;
+    text-align: center;
+}
+
+.confidence span {
+    color: #ffa500;
+    font-weight: 600;
+}
+
+.error {
+    background: rgba(220, 38, 38, 0.2);
+    border: 2px solid #dc2626;
+    color: #fca5a5;
+    padding: 15px 25px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.error.hidden {
+    display: none;
+}
+
 footer {
     text-align: center;
     padding: 20px;
     color: #666;
     margin-top: auto;
     border-top: 1px solid #444;
+}
+
+
+@media (max-width: 768px) {
+    header h1 {
+        font-size: 2em;
+    }
+
+    .fighter-selection {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .vs-divider {
+        margin: 10px 0;
+        padding: 10px 0;
+    }
+
+    .fighters-comparison {
+        flex-direction: column;
+    }
+
+    .prediction-box {
+        order: -1;
+        margin-bottom: 20px;
+    }
+
+    .result-header h2 {
+        font-size: 1.5em;
+    }
 }

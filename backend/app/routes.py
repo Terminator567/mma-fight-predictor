@@ -56,14 +56,12 @@ def predict():
     
     model = joblib.load("saved_models/RandomForestClassifierModel.joblib")
     win_prob = model.predict_proba(x_predict)
-    
-    print(win_prob)
+
     
     winner = 1 if win_prob[0][1] > win_prob[0][0] else 2
     confidence = float(max(win_prob[0]))
     
-    print(winner)
-    print(confidence)
+    
 
     return jsonify({
         "fighter1_info": {
