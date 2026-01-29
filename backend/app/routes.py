@@ -6,6 +6,12 @@ import joblib
 
 api = Blueprint("api", __name__)
 
+@api.route("/fighters", methods=["GET"])
+def get_fighters():
+    df = get_dataframe(Config.PROCESSED_CSV)
+    fighters = sorted(df["Fighter"].dropna().unique().tolist())
+    return jsonify(fighters)
+
 @api.route("/health", methods=["GET"])
 def health_check():
     return jsonify({"status": "ok"})
@@ -53,7 +59,29 @@ def predict():
     
     print(win_prob)
     
+    winner = 1 if win_prob[0][1] > win_prob[0][0] else 2
+    confidence = float(max(win_prob[0]))
+    
+    print(winner)
+    print(confidence)
+
     return jsonify({
-        "fighter1_win_prob": win_prob[0][1], 
-        "fighter2_win_prob": win_prob[0][0],
+        "fighter1_info": {
+            "weight_class": int(fighter1_info["Weight_Class_code"].iloc[0]),
+            "total_kd": int(fighter1_info["Total_KD"].iloc[0]),
+            "total_str": int(fighter1_info["Total_STR"].iloc[0]),
+            "total_td": int(fighter1_info["Total_TD"].iloc[0]),
+            "total_sub": int(fighter1_info["Total_SUB"].iloc[0]),
+        },
+        "fighter2_info": {
+            "weight_class": int(fighter2_info["Weight_Class_code"].iloc[0]),
+            "total_kd": int(fighter2_info["Total_KD"].iloc[0]),
+            "total_str": int(fighter2_info["Total_STR"].iloc[0]),
+            "total_td": int(fighter2_info["Total_TD"].iloc[0]),
+            "total_sub": int(fighter2_info["Total_SUB"].iloc[0]),
+        },
+        "prediction": {
+            "winner": winner,
+            "confidence": confidence
+        }
     })
